@@ -8,7 +8,7 @@ use crate::{
 };
 use soroban_sdk::{
     symbol_short,
-    testutils::{Address as _, AuthorizedFunction, AuthorizedInvocation},
+    testutils::{Address as _, AuthorizedFunction, AuthorizedInvocation, Ledger},
     Address, Env, IntoVal, Symbol,
 };
 
@@ -278,4 +278,31 @@ fn test_zero_allowance() {
         });
         assert!(!e.storage().temporary().has(&key));
     });
+}
+
+#[test]
+fn test_expired_allowance() {
+    let e = Env::default();
+    e.mock_all_auths();
+
+    let admin = Address::generate(&e);
+    let spender = Address::generate(&e);
+    let from = Address::generate(&e);
+    let token = create_token(&e, &admin);
+
+    token.approve(&from, &spender, &100, &200);
+    e.ledger().set_sequence_number(150);
+
+    e.as_contract(&token.address, || {
+        let key = DataKey::Allowance(AllowanceDataKey {
+            from: from.clone(),
+            spender: spender.clone(),
+        });
+        // anyone can extend storage entry
+        e.storage().temporary().extend_ttl(&key, 100, 200);
+    });
+    e.ledger().set_sequence_number(201);
+
+    let allowance = token.allowance(&from, &spender);
+    assert_eq!(allowance, 0);
 }

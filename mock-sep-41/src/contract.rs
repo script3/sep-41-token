@@ -56,6 +56,10 @@ impl MockToken {
 impl Token for MockToken {
     fn allowance(e: Env, from: Address, spender: Address) -> i128 {
         let result = storage::get_allowance(&e, &from, &spender);
+        if result.expiration_ledger < e.ledger().sequence() {
+            return 0;
+        }
+
         result.amount
     }
 
