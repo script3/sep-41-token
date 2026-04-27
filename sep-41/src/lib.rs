@@ -6,7 +6,7 @@
 #[cfg(any(test, feature = "testutils"))]
 pub mod testutils;
 
-use soroban_sdk::{contractclient, symbol_short, Address, Env, String};
+use soroban_sdk::{contractclient, contractevent, Address, Env, String};
 
 /// SEP-0041 Token Standard Trait
 #[contractclient(name = "TokenClient")]
@@ -184,6 +184,41 @@ pub trait StellarAssetExtension {
 
 pub struct TokenEvents {}
 
+#[contractevent(data_format = "vec")]
+struct Approve {
+    #[topic]
+    from: Address,
+    #[topic]
+    spender: Address,
+    amount: i128,
+    live_until_ledger: u32,
+}
+
+#[contractevent(data_format = "single-value")]
+struct Transfer {
+    #[topic]
+    from: Address,
+    #[topic]
+    to: Address,
+    amount: i128,
+}
+
+#[contractevent(data_format = "single-value")]
+struct Burn {
+    #[topic]
+    from: Address,
+    amount: i128,
+}
+
+#[contractevent(data_format = "single-value")]
+struct Mint {
+    #[topic]
+    admin: Address,
+    #[topic]
+    to: Address,
+    amount: i128,
+}
+
 impl TokenEvents {
     /// Emitted when an allowance is set
     ///
@@ -196,8 +231,13 @@ impl TokenEvents {
         amount: i128,
         live_until_ledger: u32,
     ) {
-        let topics = (symbol_short!("approve"), from, spender);
-        env.events().publish(topics, (amount, live_until_ledger));
+        Approve {
+            from,
+            spender,
+            amount,
+            live_until_ledger,
+        }
+        .publish(env);
     }
 
     /// Emitted when an amount is transferred from one address to another
@@ -205,8 +245,7 @@ impl TokenEvents {
     /// - topics - `["transfer", from: Address, to: Address]`
     /// - data - `[amount: i128]`
     pub fn transfer(env: &Env, from: Address, to: Address, amount: i128) {
-        let topics = (symbol_short!("transfer"), from, to);
-        env.events().publish(topics, amount);
+        Transfer { from, to, amount }.publish(env);
     }
 
     /// Emitted when an amount of tokens is burnt from one address
@@ -214,8 +253,7 @@ impl TokenEvents {
     /// - topics - `["burn", from: Address]`
     /// - data - `[amount: i128]`
     pub fn burn(env: &Env, from: Address, amount: i128) {
-        let topics = (symbol_short!("burn"), from);
-        env.events().publish(topics, amount);
+        Burn { from, amount }.publish(env);
     }
 
     /// Emitted when an amount of tokens is created and assigned to an address
@@ -223,7 +261,6 @@ impl TokenEvents {
     /// - topics - `["mint", admin: Address, to: Address]`
     /// - data - `[amount: i128]`
     pub fn mint(env: &Env, admin: Address, to: Address, amount: i128) {
-        let topics = (symbol_short!("mint"), admin, to);
-        env.events().publish(topics, amount);
+        Mint { admin, to, amount }.publish(env);
     }
 }
