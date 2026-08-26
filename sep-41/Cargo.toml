@@ -1,14 +1,14 @@
 [package]
 name = "sep-41-token"
-version = "1.4.0"
+version = "2.0.0"
 description = "SEP-0041 Standard Token trait, client, and mock implementation"
 authors = ["Script3 <support@script3.io>"]
-repository = "https://github.com/script3/sep-40-oracle"
+repository = "https://github.com/script3/sep-41-token"
 license = "MIT"
 edition = "2021"
 readme = "README.md"
 keywords = ["no_std", "wasm", "soroban"]
-rust-version = "1.89"
+rust-version = "1.91.1"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

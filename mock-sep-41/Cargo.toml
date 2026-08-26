@@ -5,7 +5,7 @@ authors = ["Script3 <support@script3.io>"]
 license = "MIT"
 edition = "2021"
 publish = false
-rust-version = "1.89"
+rust-version = "1.91.1"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

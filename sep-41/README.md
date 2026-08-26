@@ -21,14 +21,14 @@ You can optionally include the `testutils` feature in your `dev-dependencies` to
 
 ```toml
 [dev_dependencies]
-sep-40-token = { version = "<desired version>", features = ["testutils"] }
+sep-41-token = { version = "<desired version>", features = ["testutils"] }
 ```
 
 ### Client and Traits
-This package exposes 3 different token clients based on your usage.
+This package exposes the Protocol 27 token interfaces and clients.
 
-* `TokenClient` is the `SEP-0041` standard and is derived from the trait `Token`
-* `StellarAssetClient` exposes the functions implemented by the Stellar Asset Contract and is derived from the trait `StellarAssetExtension`
+* `Token` and `TokenClient` re-export the Protocol 27 SEP-41 interface and client from `soroban-sdk`.
+* `StellarAssetExtension` and `StellarAssetClient` re-export the Protocol 27 Stellar Asset Contract interface and client from `soroban-sdk`.
 
 ### Mock Token
 This package exposes an example Soroban token implementation of the `SEP-0041` standard that can be used to test protocol interactions with Soroban tokens. This is important to test as interacting with Soroban tokens has a much larger cost impact than interacting with the Stellar Asset Contract.
@@ -41,7 +41,7 @@ use soroban_sdk::{testutils::Address as _, Address, Env, String};
 let env = Env::default();
 
 let admin = Address::generate(&env);
-let token_id = env.register_contract_wasm(None, MockTokenWASM);
+let token_id = env.register(MockTokenWASM, ());
 let token_client = MockTokenClient::new(&env, &token_id);
 token_client.initialize(
     &admin,

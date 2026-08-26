@@ -3,7 +3,7 @@ use crate::balance::{receive_balance, spend_balance};
 use crate::error::TokenError;
 use crate::storage::{self, TokenMetadata};
 use sep_41_token::{Token, TokenEvents};
-use soroban_sdk::{contract, contractimpl, panic_with_error, Address, Env, String};
+use soroban_sdk::{contract, contractimpl, panic_with_error, Address, Env, MuxedAddress, String};
 
 fn check_nonnegative_amount(amount: i128) {
     if amount < 0 {
@@ -40,7 +40,7 @@ impl MockToken {
 
         receive_balance(&e, &to, amount);
 
-        TokenEvents::mint(&e, admin, to, amount);
+        TokenEvents::mint(&e, to, amount);
     }
 
     pub fn set_admin(e: Env, new_admin: Address) {
@@ -78,13 +78,14 @@ impl Token for MockToken {
         storage::get_balance(&e, &id)
     }
 
-    fn transfer(e: Env, from: Address, to: Address, amount: i128) {
+    fn transfer(e: Env, from: Address, to: MuxedAddress, amount: i128) {
         from.require_auth();
         check_nonnegative_amount(amount);
         storage::extend_instance(&e);
 
+        let to_address = to.address();
         spend_balance(&e, &from, amount);
-        receive_balance(&e, &to, amount);
+        receive_balance(&e, &to_address, amount);
 
         TokenEvents::transfer(&e, from, to, amount);
     }
@@ -98,7 +99,7 @@ impl Token for MockToken {
         spend_balance(&e, &from, amount);
         receive_balance(&e, &to, amount);
 
-        TokenEvents::transfer(&e, from, to, amount);
+        TokenEvents::transfer_from(&e, from, to, amount);
     }
 
     fn burn(e: Env, from: Address, amount: i128) {
