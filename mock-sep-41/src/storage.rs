@@ -14,7 +14,7 @@ const METADATA_KEY: Symbol = symbol_short!("METADATA");
 const ADMIN_KEY: Symbol = symbol_short!("ADMIN");
 
 #[derive(Clone)]
-#[contracttype]
+#[contracttype(export = false)]
 pub struct TokenMetadata {
     pub decimal: u32,
     pub name: String,
@@ -22,20 +22,20 @@ pub struct TokenMetadata {
 }
 
 #[derive(Clone)]
-#[contracttype]
+#[contracttype(export = false)]
 pub struct AllowanceDataKey {
     pub from: Address,
     pub spender: Address,
 }
 
-#[contracttype]
+#[contracttype(export = false)]
 pub struct AllowanceValue {
     pub amount: i128,
     pub expiration_ledger: u32,
 }
 
 #[derive(Clone)]
-#[contracttype]
+#[contracttype(export = false)]
 pub enum DataKey {
     Allowance(AllowanceDataKey),
     Balance(Address),
@@ -124,7 +124,7 @@ pub fn get_allowance(e: &Env, from: &Address, spender: &Address) -> AllowanceVal
         spender: spender.clone(),
     });
     let temp = e.storage().temporary().get(&key);
-    temp.unwrap_or_else(|| AllowanceValue {
+    temp.unwrap_or(AllowanceValue {
         amount: 0,
         expiration_ledger: 0,
     })

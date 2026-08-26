@@ -9,7 +9,7 @@ use crate::{
 use soroban_sdk::{
     symbol_short,
     testutils::{Address as _, AuthorizedFunction, AuthorizedInvocation, Ledger},
-    Address, Env, IntoVal, Symbol,
+    Address, Env, IntoVal, MuxedAddress, Symbol,
 };
 
 fn create_token<'a>(e: &Env, admin: &Address) -> MockTokenClient<'a> {
@@ -64,7 +64,7 @@ fn test() {
     );
     assert_eq!(token.allowance(&user2, &user3), 500);
 
-    token.transfer(&user1, &user2, &600);
+    token.transfer(&user1, MuxedAddress::from(&user2), &600);
     assert_eq!(
         e.auths(),
         std::vec![(
@@ -100,7 +100,7 @@ fn test() {
     assert_eq!(token.balance(&user1), 800);
     assert_eq!(token.balance(&user2), 200);
 
-    token.transfer(&user1, &user3, &300);
+    token.transfer(&user1, MuxedAddress::from(&user3), &300);
     assert_eq!(token.balance(&user1), 500);
     assert_eq!(token.balance(&user3), 300);
 
@@ -211,7 +211,7 @@ fn transfer_insufficient_balance() {
     token.mint(&user1, &1000);
     assert_eq!(token.balance(&user1), 1000);
 
-    token.transfer(&user1, &user2, &1001);
+    token.transfer(&user1, MuxedAddress::from(&user2), &1001);
 }
 
 #[test]

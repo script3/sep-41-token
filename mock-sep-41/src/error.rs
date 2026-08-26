@@ -3,6 +3,7 @@ use soroban_sdk::contracterror;
 /// The error codes for the contract.
 #[contracterror]
 #[derive(Copy, Clone, PartialEq, Eq)]
+#[allow(clippy::enum_variant_names)]
 pub enum TokenError {
     InternalError = 1,
     OperationNotSupportedError = 2,
